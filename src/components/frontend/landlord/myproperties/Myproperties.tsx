@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import Spinner from "@/components/frontend/ui/spinner";
 import PopConfirm from "@/components/frontend/ui/PropConfirm/PopConfirm";
 import { message } from "antd";
-import hiddenBody from "@/components/frontend/managerDom/HiddenBody";
+import hiddenBody from "../../managerDom/HiddenBody";
 
 // ข้อมูลทรัพย์สินจำลอง
 // Mock data for properties
@@ -243,8 +243,8 @@ const MyProperties = () => {
 
   return (
     <div>
-      <div className="bg-gray-50 min-h-screen py-4 sm:p-6 lg:p-8">
-        <div className="container mx-auto">
+      <div className="bg-gray-50">
+        <div className="">
           {/* ส่วนหัวของหน้า */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-extrabold text-gray-900">
@@ -259,7 +259,7 @@ const MyProperties = () => {
           </div>
 
           {/* แสดงผลรายการทรัพย์สินในรูปแบบ Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map((property) => (
               <PropertyCard
                 key={property.id}

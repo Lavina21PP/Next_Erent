@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     // ✅ ตัดสินใจว่าจะ redirect ไปหน้าไหน
     let redirectUrl = "/";
     if (user.role === "ADMIN") redirectUrl = "/admin";
-    if (user.role === "LANDLORD") redirectUrl = "/landlord";
+    if (user.role === "LANDLORD") redirectUrl = "landlord/myproperties";
     if (user.role === "TENANT") redirectUrl = "/tenant";
 
     const token = await new SignJWT({

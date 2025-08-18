@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
         // ✅ ตัดสินใจว่าจะ redirect ไปหน้าไหน
     let redirectUrl = "/";
     if (newUser.role === "ADMIN") redirectUrl = "/admin";
-    if (newUser.role === "LANDLORD") redirectUrl = "/landlord";
+    if (newUser.role === "LANDLORD") redirectUrl = "landlord/myproperties";
     if (newUser.role === "TENANT") redirectUrl = "/tenant";
 
     const res = NextResponse.json(

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { MessageProvider } from "@/components/frontend/context/MessageContext";
+import ClientLayout from "@/components/frontend/appbar/ClientLayout";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased`}>
-        <MessageProvider>{children}</MessageProvider>
+        <MessageProvider>
+          <ClientLayout>{children}</ClientLayout>
+        </MessageProvider>
       </body>
     </html>
   );

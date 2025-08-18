@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@prisma/client": "^6.14.0",
     "antd": "^5.27.0",
     "axios": "^1.11.0",

@@ -3,8 +3,8 @@
 
 import React from "react";
 import { Button, Result } from "antd";
+import '@ant-design/v5-patch-for-react-19';
 import { useRouter } from "next/navigation";
-
 const NotFound: React.FC = () => {
   const router = useRouter();
 
