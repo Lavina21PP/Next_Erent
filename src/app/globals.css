@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@font-face {
+  font-family: "NotoSansLaos"; /* ชื่อฟอนต์ที่เราจะเรียกใช้ */
+  src: url("../font/NotoSansLao-VariableFont_wdth,wght.ttf") format("truetype"); /* ไฟล์ฟอนต์และฟอร์แมต */
+  font-weight: normal; /* น้ำหนักปกติ */
+  font-style: normal; /* สไตล์ปกติ (ไม่เอียง) */
+}
+@font-face {
+  font-family: "Roboto"; /* ชื่อฟอนต์ที่เราจะเรียกใช้ */
+  src: url("../font/Roboto-VariableFont_wdth,wght.ttf") format("truetype"); /* ไฟล์ฟอนต์และฟอร์แมต */
+  font-weight: normal; /* น้ำหนักปกติ */
+  font-style: normal; /* สไตล์ปกติ (ไม่เอียง) */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  /* scrollbar-gutter: stable both-edges; */
 }
 
+/* Body defaults */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Roboto", "NotoSansLaos", Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+  background-color: #f8f9fa;
+  font-size: 16px;
+}
+
+/* Links */
+a {
+  text-decoration: none;
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+}
+
+/* Utility */
+.container {
+  max-width: 96%;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Chrome, Safari, Edge */
+/* ::-webkit-scrollbar {
+  display: none;
+} */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* สำหรับ Chrome, Safari และ Opera */
+}
+
+.contain {
+  max-width: 96%;
+  margin: 0 auto;
+  width: 100%;
 }

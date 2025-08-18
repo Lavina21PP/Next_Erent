@@ -1,0 +1,279 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model favorite {
+  id          Int       @id @default(autoincrement())
+  tenant_id   Int?
+  property_id Int?
+  created_at  DateTime? @db.DateTime(0)
+  user        user?     @relation(fields: [tenant_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "favorite_ibfk_1")
+  property    property? @relation(fields: [property_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "favorite_ibfk_2")
+
+  @@index([property_id], map: "property_id")
+  @@index([tenant_id], map: "tenant_id")
+}
+
+model featured_listing {
+  id            Int       @id @default(autoincrement())
+  property_id   Int?
+  display_order Int?
+  created_at    DateTime? @db.DateTime(0)
+  property      property? @relation(fields: [property_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "featured_listing_ibfk_1")
+
+  @@index([property_id], map: "property_id")
+}
+
+model login_attempts {
+  id           Int      @id @default(autoincrement())
+  ip_address   String   @db.VarChar(45)
+  attempt_time DateTime @db.DateTime(0)
+}
+
+model login_log {
+  id           Int       @id @default(autoincrement())
+  user_id      Int?
+  ip_address   String?   @db.VarChar(100)
+  device_info  String?   @db.Text
+  logged_in_at DateTime? @db.DateTime(0)
+  user         user?     @relation(fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "login_log_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model message {
+  id                             Int             @id @default(autoincrement())
+  sender_id                      Int?
+  receiver_id                    Int?
+  property_id                    Int?
+  content                        String?         @db.Text
+  sent_at                        DateTime?       @db.DateTime(0)
+  status                         message_status?
+  user_message_sender_idTouser   user?           @relation("message_sender_idTouser", fields: [sender_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "message_ibfk_1")
+  user_message_receiver_idTouser user?           @relation("message_receiver_idTouser", fields: [receiver_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "message_ibfk_2")
+  property                       property?       @relation(fields: [property_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "message_ibfk_3")
+
+  @@index([property_id], map: "property_id")
+  @@index([receiver_id], map: "receiver_id")
+  @@index([sender_id], map: "sender_id")
+}
+
+model promotion {
+  id          Int                    @id @default(autoincrement())
+  title       String?                @db.VarChar(255)
+  description String?                @db.Text
+  image_url   String?                @db.Text
+  start_date  DateTime?              @db.Date
+  end_date    DateTime?              @db.Date
+  target_role promotion_target_role?
+  created_at  DateTime?              @db.DateTime(0)
+}
+
+model property {
+  id                 Int                  @id @default(autoincrement())
+  landlord_id        Int
+  name               String               @db.VarChar(255)
+  description        String?              @db.Text
+  address            String?              @db.Text
+  price              Decimal?             @db.Decimal(10, 2)
+  status             property_status      @default(AVAILABLE)
+  subscription_id    Int?
+  property_type_id   Int
+  created_at         DateTime?            @db.DateTime(0)
+  updated_at         DateTime?            @db.DateTime(0)
+  latitude           String?              @db.VarChar(50)
+  longitude          String?              @db.VarChar(50)
+  logo               String?              @db.VarChar(255)
+  favorite           favorite[]
+  featured_listing   featured_listing[]
+  message            message[]
+  user               user                 @relation(fields: [landlord_id], references: [id], onDelete: Cascade, map: "property_ibfk_1")
+  subscription       subscription?        @relation(fields: [subscription_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "property_ibfk_2")
+  property_type      property_type        @relation(fields: [property_type_id], references: [id], onUpdate: Restrict, map: "property_ibfk_3")
+  property_attribute property_attribute[]
+  property_image     property_image[]
+  rating             rating[]
+  rent               rent[]
+  tour_schedule      tour_schedule[]
+
+  @@index([landlord_id], map: "landlord_id")
+  @@index([property_type_id], map: "property_type_id")
+  @@index([subscription_id], map: "subscription_id")
+}
+
+model property_attribute {
+  id              Int       @id @default(autoincrement())
+  property_id     Int?
+  attribute_name  String?   @db.VarChar(100)
+  attribute_value String?   @db.VarChar(255)
+  property        property? @relation(fields: [property_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "property_attribute_ibfk_1")
+
+  @@index([property_id], map: "property_id")
+}
+
+model property_image {
+  id          Int      @id @default(autoincrement())
+  image       String?  @db.VarChar(255)
+  property_id Int
+  property    property @relation(fields: [property_id], references: [id], onDelete: Cascade, map: "property_image_ibfk_1")
+
+  @@index([property_id], map: "property_image_ibfk_1")
+}
+
+model property_type {
+  id       Int        @id @default(autoincrement())
+  name     String?    @db.VarChar(100)
+  property property[]
+}
+
+model rating {
+  id          Int       @id @default(autoincrement())
+  tenant_id   Int?
+  property_id Int?
+  score       Int?
+  comment     String?   @db.Text
+  created_at  DateTime? @db.DateTime(0)
+  user        user?     @relation(fields: [tenant_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "rating_ibfk_1")
+  property    property? @relation(fields: [property_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "rating_ibfk_2")
+
+  @@index([property_id], map: "property_id")
+  @@index([tenant_id], map: "tenant_id")
+}
+
+model rent {
+  id          Int      @id @default(autoincrement())
+  tenant_id   Int
+  property_id Int
+  price       Decimal  @db.Decimal(10, 2)
+  start_date  DateTime @db.DateTime(0)
+  end_date    DateTime @db.DateTime(0)
+  total_days  Int
+  user        user     @relation(fields: [tenant_id], references: [id], onDelete: Cascade, map: "rent_ibfk_1")
+  property    property @relation(fields: [property_id], references: [id], onDelete: Cascade, map: "rent_ibfk_2")
+
+  @@index([property_id], map: "property_id")
+  @@index([tenant_id], map: "rent_ibfk_1")
+}
+
+model setting {
+  id       Int     @id @default(autoincrement())
+  key_name String? @unique(map: "key_name") @db.VarChar(100)
+  value    String? @db.Text
+}
+
+model subscription {
+  id            Int        @id @default(autoincrement())
+  name          String?    @db.VarChar(100)
+  fee           Decimal?   @db.Decimal(10, 2)
+  duration_days Int?
+  features      String?    @db.Text
+  created_at    DateTime?  @db.DateTime(0)
+  updated_at    DateTime?  @db.DateTime(0)
+  property      property[]
+}
+
+model tour_schedule {
+  id                                    Int                    @id @default(autoincrement())
+  created_at                            DateTime               @db.DateTime(0)
+  created_by                            Int
+  status                                tour_schedule_status   @default(PENDING)
+  status_reason                         String?                @db.VarChar(255)
+  property_id                           Int?
+  confirmed_by                          Int?
+  user_tour_schedule_created_byTouser   user                   @relation("tour_schedule_created_byTouser", fields: [created_by], references: [id], onDelete: Cascade, map: "tour_schedule_ibfk_1")
+  property                              property?              @relation(fields: [property_id], references: [id], onDelete: Cascade, map: "tour_schedule_ibfk_2")
+  user_tour_schedule_confirmed_byTouser user?                  @relation("tour_schedule_confirmed_byTouser", fields: [confirmed_by], references: [id], onDelete: Cascade, map: "tour_schedule_ibfk_3")
+  tour_schedule_detail                  tour_schedule_detail[]
+
+  @@index([created_by], map: "tour_schedule_ibfk_1")
+  @@index([property_id], map: "tour_schedule_ibfk_2")
+  @@index([confirmed_by], map: "tour_schedule_ibfk_3")
+}
+
+model tour_schedule_detail {
+  id                Int                          @id @default(autoincrement())
+  date_face2face    DateTime                     @db.Date
+  time_face2face    DateTime                     @db.Time(0)
+  address_face2face String                       @db.VarChar(255)
+  request_by        Int?
+  response_by       Int?
+  status            tour_schedule_detail_status?
+  tour_schedule_id  Int
+  tour_schedule     tour_schedule                @relation(fields: [tour_schedule_id], references: [id], onDelete: Cascade, map: "tour_schedule_detail_ibfk_1")
+
+  @@index([tour_schedule_id], map: "tour_schedule_detail_ibfk_1")
+}
+
+model user {
+  id                                             Int             @id @default(autoincrement())
+  first_name                                     String?         @db.VarChar(50)
+  last_name                                      String?         @db.VarChar(50)
+  email_phone                                    String?         @unique(map: "unique_email") @db.VarChar(50)
+  password_hash                                  String          @db.VarChar(255)
+  auth_key                                       String          @db.VarChar(32)
+  password_reset_token                           String?         @unique(map: "password_reset_token") @db.VarChar(255)
+  status                                         Int             @default(10) @db.SmallInt
+  created_at                                     Int
+  updated_at                                     Int
+  otp_code                                       Int?
+  role                                           user_role?
+  favorite                                       favorite[]
+  login_log                                      login_log[]
+  message_message_sender_idTouser                message[]       @relation("message_sender_idTouser")
+  message_message_receiver_idTouser              message[]       @relation("message_receiver_idTouser")
+  property                                       property[]
+  rating                                         rating[]
+  rent                                           rent[]
+  tour_schedule_tour_schedule_created_byTouser   tour_schedule[] @relation("tour_schedule_created_byTouser")
+  tour_schedule_tour_schedule_confirmed_byTouser tour_schedule[] @relation("tour_schedule_confirmed_byTouser")
+}
+
+model otp_verifications {
+  id          Int       @id @default(autoincrement())
+  contact     String    @db.VarChar(255)
+  otp_code    String    @db.VarChar(10)
+  expires_at  DateTime  @db.DateTime(0)
+  is_verified Boolean?  @default(false)
+  created_at  DateTime? @default(now()) @db.DateTime(0)
+  updated_at  DateTime? @default(now()) @db.DateTime(0)
+
+  @@index([contact], map: "idx_contact")
+}
+
+enum tour_schedule_status {
+  CONFIRMED
+  PENDING
+  DECLINED
+}
+
+enum message_status {
+  READ
+  SEND
+}
+
+enum promotion_target_role {
+  LANDLORD
+  TENANT
+}
+
+enum property_status {
+  AVAILABLE
+  RENTED
+  INACTIVE
+}
+
+enum tour_schedule_detail_status {
+  POSTPONE
+  OK
+}
+
+enum user_role {
+  ADMIN
+  LANDLORD
+  TENANT
+}
