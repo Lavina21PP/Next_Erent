@@ -10,16 +10,21 @@ import {
   Search,
   ChevronDown,
 } from "lucide-react";
+import { useLogout } from "@/lib/logout";
 import { useRouter } from "next/navigation";
-import hiddenBody from "../managerDom/HiddenBody";
 import axios from "axios";
 import { useMessage } from "../context/MessageContext";
+import { getRole } from "@/lib/getRole";
+
 type AppBarLayoutProps = {
   children: React.ReactNode; // Declare children prop
 };
 
 const AppBarLayout: React.FC<AppBarLayoutProps> = ({ children }) => {
+  const [role, setRole] = useState<string | null>(null);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const logout = useLogout();
   const { showMessage } = useMessage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdown, setProfileDropdown] = useState(false);
@@ -72,25 +77,8 @@ const AppBarLayout: React.FC<AppBarLayoutProps> = ({ children }) => {
     };
   }, [profileDropdown]); // Re-run effect when profileDropdown state changes
 
-  const onSignOut = async () => {
-    try {
-      const resSignOut = await axios.post("/api/logout/", {
-        headers: { "Content-Type": "application/json" },
-      });
-      if (resSignOut) {
-        showMessage("success", "You have been signed out.");
-        router.replace("/login");
-      }
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        if (err.response?.data.message) {
-          showMessage("error", err.response.data.message);
-        }
-      } else {
-        console.error("Unknown error:", err);
-      }
-    }
-  };
+  // if (isLoading) return <p>Loading role...</p>;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {" "}
@@ -117,7 +105,7 @@ const AppBarLayout: React.FC<AppBarLayoutProps> = ({ children }) => {
               <span className="text-white font-bold">A</span>
             </div>
             <span className="ml-3 text-xl font-semibold text-gray-900">
-              App Name
+              {role}
             </span>
           </div>
           {/* This is the button that closes the sidebar when clicked */}
@@ -256,7 +244,7 @@ const AppBarLayout: React.FC<AppBarLayoutProps> = ({ children }) => {
                         Settings
                       </a>
                       <div
-                        onClick={onSignOut}
+                        onClick={logout}
                         className="block px-4 py-2 text-sm text-red-700 hover:bg-red-50 rounded-md transition-colors duration-150 focus:outline-none focus:ring-0" // Added focus:outline-none focus:ring-0
                       >
                         Sign out
@@ -270,7 +258,7 @@ const AppBarLayout: React.FC<AppBarLayoutProps> = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <main className="p-6">
+        <main className="">
           {" "}
           {/* Removed min-h-screen from main to allow content to dictate height, adjusted in overall div */}
           <div className="max-w-7xl mx-auto">
