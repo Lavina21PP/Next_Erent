@@ -1,0 +1,36 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { jwtVerify } from "jose";
+const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET!);
+
+export async function GET(req: NextRequest) {
+  try {
+    // 1️⃣ อ่าน token จาก cookie
+    const token = req.cookies.get("token")?.value;
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    let decoded: any;
+    try {
+      const { payload } = await jwtVerify(token, SECRET_KEY);
+      decoded = payload;
+    } catch {
+      return NextResponse.json(
+        { success: false, message: "Invalid token" },
+        { status: 401 }
+      );
+    }
+    const property_type = await prisma.property_type.findMany();
+
+    return NextResponse.json(
+      { success: true, data: property_type },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: String(error) }, { status: 500 });
+  }
+}

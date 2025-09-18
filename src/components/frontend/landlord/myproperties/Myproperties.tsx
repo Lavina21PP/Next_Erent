@@ -1,7 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Plus, Edit, Trash2, ArrowUpRight, X } from "lucide-react";
-import { PropertyModelTest } from "./Type";
+import { Plus, Edit, Trash2, ArrowUpRight, X, MapPin } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
+
 import Form from "./Form";
 
 import { useRouter } from "next/navigation";
@@ -9,138 +10,95 @@ import Spinner from "@/components/frontend/ui/spinner";
 import PopConfirm from "@/components/frontend/ui/PropConfirm/PopConfirm";
 import { message } from "antd";
 import hiddenBody from "../../managerDom/HiddenBody";
+import axios from "axios";
+import { useMessage } from "../../context/MessageContext";
+import { PropertyTypeCreate, PropertyTypeResponse } from "./Type";
+import { manager_property } from "@/services/api";
+import { useRole } from "../../context/RoleContext";
+import { deleteFolder } from "@/lib/api";
 
-// ข้อมูลทรัพย์สินจำลอง
-// Mock data for properties
-const mockProperties: PropertyModelTest[] = [
-  {
-    id: 1,
-    landlord_id: 2,
-    name: "sdfsf",
-    logo: "https://images.pexels.com/photos/2102587/pexels-photo-2102587.jpeg",
-    description: "sdfsdfsdf",
-    address: "sdfdsf",
-    price: "2300000",
-    status: "AVAILABLE",
-    subscription_id: null,
-    propertyTypeName: "APARTMENT",
-    created_at: "sfsfd",
-    updated_at: "sfsf",
-    latitude: "sfsf",
-    longitude: "sfsf",
-  },
-  {
-    id: 2,
-    landlord_id: 2,
-    name: "sdfsf",
-    logo: "https://images.pexels.com/photos/2102587/pexels-photo-2102587.jpeg",
-    description: "sdfsdfsdf",
-    address: "sdfdsf",
-    price: "2300000",
-    status: "AVAILABLE",
-    subscription_id: null,
-    propertyTypeName: "APARTMENT",
-    created_at: "sfsfd",
-    updated_at: "sfsf",
-    latitude: "sfsf",
-    longitude: "sfsf",
-  },
-  {
-    id: 3,
-    landlord_id: 2,
-    name: "sdfsf5",
-    logo: "https://images.pexels.com/photos/2102587/pexels-photo-2102587.jpeg",
-    description: "sdfsdfsdf",
-    address: "sdfdsf",
-    price: "2300000",
-    status: "AVAILABLE",
-    subscription_id: null,
-    propertyTypeName: "APARTMENT",
-    created_at: "sfsfd",
-    updated_at: "sfsf",
-    latitude: "sfsf",
-    longitude: "sfsf",
-  },
-  {
-    id: 4,
-    landlord_id: 2,
-    name: "sdfsf",
-    logo: "https://images.pexels.com/photos/2102587/pexels-photo-2102587.jpeg",
-    description: "sdfsdfsdf",
-    address: "sdfdsf",
-    price: "2300000",
-    status: "AVAILABLE",
-    subscription_id: null,
-    propertyTypeName: "APARTMENT",
-    created_at: "sfsfd",
-    updated_at: "sfsf",
-    latitude: "sfsf",
-    longitude: "sfsf",
-  },
-];
-
-// คอมโพเนนต์การ์ดสำหรับแสดงทรัพย์สินแต่ละรายการ
-// Property card component
 const PropertyCard: React.FC<{
-  property: PropertyModelTest;
+  property: PropertyTypeResponse;
   onEdit: () => void;
   onDelete: () => void;
 }> = ({ property, onEdit, onDelete }) => {
   const router = useRouter();
-
-  //go to path...
-  const goToAbout = (path: string) => {
-    router.push(path);
-  };
+  const { id } = useRole();
 
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-200 relative">
       {/* ส่วนรูปภาพ */}
-      <img
-        src={property.logo}
-        alt={property.name}
-        className="w-full h-48 object-cover"
-      />
+      <div className="relative">
+        <img
+          src={
+            property.coverImage
+              ? `http://localhost:5000/image/${id}/cover_property/${property.uuid}/${property.coverImage}`
+              : undefined
+          }
+          alt={property.name}
+          // ปรับขนาดรูปภาพ responsive: เต็มความกว้างบนมือถือ, คงที่ 48h บนจอใหญ่
+          className="w-full h-48 object-cover sm:h-48"
+        />
+        <div className="absolute top-3 right-3">
+          <button
+            className={`p-2 rounded-full transition-colors ${"bg-white/80 text-gray-600 hover:bg-white"}`}
+            // onClick={() => navigate(`/landlord/property-detail/${property.id}`)}              aria-label="ดูรายละเอียด"
+            title="ดูรายละเอียด"
+          >
+            <ArrowUpRight
+              onClick={() =>
+                router.push(`/landlord/myproperties/detail/${property.id}`)
+              }
+              size={20}
+            />
+          </button>
+        </div>
+        <div className="absolute top-3 left-3">
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium ${
+              property.property_status_id === 1
+                ? "bg-green-500 text-white"
+                : property.property_status_id === 2
+                ? "bg-red-500 text-white"
+                : property.property_status_id === 3 &&
+                  "bg-orange-500 text-white"
+            }`}
+          >
+            {property.property_status.name}
+          </span>
+        </div>
+        <div className="absolute bottom-3 left-3">
+          <span className="bg-blue-600 text-white px-2 py-1 rounded-md text-xs font-medium">
+            {property.property_type.name}
+          </span>
+        </div>
+      </div>
 
       {/* ไอคอนสำหรับดูรายละเอียดที่มุมขวาบน */}
-      <button
-        // onClick={() => navigate(`/landlord/property-detail/${property.id}`)}
-        className="absolute top-4 right-4 bg-white bg-opacity-80 p-2 rounded-full shadow-md text-gray-800 hover:bg-gray-100 transition-colors"
-        aria-label="ดูรายละเอียด"
-        title="ดูรายละเอียด"
-      >
-        <ArrowUpRight size={20} />
-      </button>
 
       {/* ส่วนเนื้อหาของการ์ด */}
       <div className="p-4 space-y-3">
-        <h3 className="text-xl font-bold text-gray-800">{property.name}</h3>
-        <div className="text-sm text-gray-500">
-          <p className="font-semibold text-gray-600">
-            ທີ່ຢູ່: {property.address}
-          </p>
+        <h3 className="font-bold text-lg sm:text-xl text-gray-900 mb-2">
+          {property.name}
+        </h3>
+
+        <div className="flex items-center text-gray-600 mb-3">
+          <MapPin size={16} className="mr-1" />
+          <span className="text-sm sm:text-base">{property.address}</span>
         </div>
-        <div className="text-sm font-semibold">
-          ສະຖານະ:
-          <span
-            className={`ml-2 px-2 py-1 rounded-full text-xs font-bold text-white
-              ${property.status === "AVAILABLE" ? "bg-green-500" : ""}
-              ${property.status === "RENTED" ? "bg-yellow-500" : ""}
-              ${property.status === "INACTIVE" ? "bg-red-500" : ""}
-            `}
-          >
-            {property.status === "AVAILABLE" && "ວ່າງ"}
-            {property.status === "RENTED" && "ມີຜູ້ເຊົ່າແລ້ວ"}
-            {property.status === "INACTIVE" && "ປິດໃຊ້ງານ"}
+        <p className="text-gray-600 text-sm sm:text-base mb-3 line-clamp-2">
+          {property.description}
+        </p>
+
+        <div>
+          <span className="text-2xl sm:text-3xl font-bold text-blue-600">
+            ฿{property.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          </span>
+          <span className="text-gray-500 text-sm sm:text-base ml-1">
+            /month
           </span>
         </div>
-        <div className="text-lg font-bold text-blue-600">
-          {new Intl.NumberFormat("th-TH", {
-            style: "currency",
-            currency: "THB",
-            minimumFractionDigits: 0,
-          }).format(Number(property.price))}
-        </div>
+
         <div className="flex gap-2 pt-2">
           <button
             onClick={onEdit}
@@ -162,15 +120,21 @@ const PropertyCard: React.FC<{
 
 // คอมโพเนนต์หน้าหลัก "My Properties"
 // The main "My Properties" page component
-const MyProperties = () => {
-  const [properties, setProperties] =
-    useState<PropertyModelTest[]>(mockProperties);
+const MyProperties: React.FC<{ initialProperties: PropertyTypeResponse[] }> = ({
+  initialProperties,
+}) => {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] =
-    useState<PropertyModelTest | null>(null);
-  const [statusForm, setStatusForm] = useState<string>("");
+    useState<PropertyTypeResponse | null>(null);
+  const [statusForm, setStatusForm] = useState<"create" | "update" | "">("");
+  const { id } = useRole();
+
   const [openPopConfirm, setOpenPopConfirm] = useState<boolean>(false);
 
+  const { showMessage } = useMessage();
+  const [isLoading, setIsLoading] = useState(false);
+  const [properties, setProperties] =
+    useState<PropertyTypeResponse[]>(initialProperties);
   //showMessagePop
   const [messageApi, contextHolder] = message.useMessage();
   const success = ({ type, text }: { type: any; text: string }) => {
@@ -191,27 +155,219 @@ const MyProperties = () => {
     };
   }, [openPopConfirm, isFormModalOpen]);
 
-  const handleEditProperty = (updatedProperty: PropertyModelTest) => {
-    setProperties(
-      properties.map((p) => (p.id === updatedProperty.id ? updatedProperty : p))
-    );
-    setSelectedProperty(null);
-  };
-
-  const handleAddProperty = (newProperty: Omit<PropertyModelTest, "id">) => {
-    const newId = properties.length + 1;
-    setProperties([...properties, { ...newProperty, id: newId }]);
-  };
-
-  const handleDeleteProperty = () => {
-    if (selectedProperty) {
-      setProperties(properties.filter((p) => p.id !== selectedProperty.id));
-      setOpenPopConfirm(false);
-      success({
-        type: "success",
-        text: `Delete Property ID: ${selectedProperty.id} Successfully!`,
+  const refreshDataProperties = async () => {
+    try {
+      setIsLoading(true);
+      const res = await manager_property.get_property({
+        withCredentials: true,
       });
-      setSelectedProperty(null);
+      setProperties(res.data.data);
+    } catch (err) {
+      console.error("Failed to refresh", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddProperty = async (newProperty: PropertyTypeCreate) => {
+    console.log("Submitting property data:", newProperty);
+    const uuid = uuidv4();
+
+    setIsLoading(true);
+    try {
+      let formData = new FormData();
+      let formDataPyUpload = new FormData();
+      formData.append("uuid", uuid);
+      formData.append("name", newProperty.name);
+      formData.append("description", newProperty.description);
+      formData.append("address", newProperty.address);
+      formData.append("price", newProperty.price);
+      formData.append("status", String(newProperty.property_status_id));
+      formData.append("property_type_id", String(newProperty.property_type_id));
+      formData.append("latitude", newProperty.latitude);
+      formData.append("longitude", newProperty.longitude);
+      formDataPyUpload.append("user_id", String(id));
+      if (newProperty.coverImage) {
+        formDataPyUpload.append("coverImage", newProperty.coverImage);
+      }
+
+      newProperty.images.forEach((file) => formData.append("images", file));
+      newProperty.images.forEach((file) =>
+        formDataPyUpload.append("images", file)
+      );
+
+      formDataPyUpload.append("property_uuid", uuid);
+      const res_py = await axios.post(
+        "http://127.0.0.1:5000/upload_multiple",
+        formDataPyUpload,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      if (res_py.data.success) {
+        console.log("upload on py success");
+        formDataPyUpload = new FormData();
+
+        formData.append(
+          "name_cover_image_property",
+          res_py.data.name_cover_image_property
+        );
+        res_py.data.name_image_property.forEach((img: any) =>
+          formData.append("name_image_property", img)
+        );
+
+        const add_property = await manager_property.post_property(formData, {
+          withCredentials: true,
+        });
+
+        if (add_property.data.success) {
+          formData = new FormData();
+          showMessage("success", add_property.data.message);
+          handleCloseFormModel();
+          refreshDataProperties();
+        }
+      }
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        if (err.response?.data.message) {
+          showMessage("error", err.response.data.message);
+        }
+      } else {
+        console.error("Unknown error:", err);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const onEditProperty = async (newProperty: PropertyTypeCreate) => {
+
+    if (selectedProperty) {
+      console.log("ksdf", newProperty);
+      setIsLoading(true);
+      try {
+        let formData = new FormData();
+        let formDataPyUpload = new FormData();
+        formData.append("name", newProperty.name);
+        formData.append("description", newProperty.description);
+        formData.append("address", newProperty.address);
+        formData.append("price", newProperty.price);
+        formData.append("status", String(newProperty.property_status_id));
+        formData.append(
+          "property_type_id",
+          String(newProperty.property_type_id)
+        );
+        formData.append("latitude", newProperty.latitude);
+        formData.append("longitude", newProperty.longitude);
+        formDataPyUpload.append("user_id", String(id));
+
+        if (newProperty.coverImage) {
+          if (newProperty.coverImage instanceof File) {
+            formDataPyUpload.append("coverImage", newProperty.coverImage); // รูปใหม่
+          } else {
+            formDataPyUpload.append("coverImageOld", newProperty.coverImage); // ชื่อไฟล์เดิม
+          }
+        }
+
+        if (newProperty.images.length) {
+          newProperty.images.forEach((img) => {
+            if (img instanceof File) {
+              formDataPyUpload.append("images", img); // รูปใหม่
+            } else if (typeof img === "string") {
+              formDataPyUpload.append("imagesOld", img); // ชื่อไฟล์เดิม
+            }
+          });
+        }
+
+        formDataPyUpload.append("property_uuid", newProperty.uuid);
+
+        for (let [key, value] of formDataPyUpload.entries()) {
+          console.log("sss: ", key, value);
+        }
+
+        const res_py = await axios.post(
+          "http://127.0.0.1:5000/upload_multiple_delete",
+          formDataPyUpload,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+
+        if (res_py.data.success) {
+          console.log("upload on py success");
+          formDataPyUpload = new FormData();
+
+          formData.append(
+            "name_cover_image_property",
+            res_py.data.name_cover_image_property
+          );
+          res_py.data.name_image_property.forEach((img: any) =>
+            formData.append("name_image_property", img)
+          );
+
+          const edit_property = await manager_property.put_property(formData, {
+            withCredentials: true,
+            params: { property_id: selectedProperty.id },
+          });
+
+          if (edit_property.data.success) {
+            formData = new FormData();
+            showMessage("success", edit_property.data.message);
+            handleCloseFormModel();
+            refreshDataProperties();
+          }
+        }
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          if (err.response?.data.message) {
+            showMessage("error", err.response.data.message);
+          }
+        } else {
+          console.error("Unknown error:", err);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleDeleteProperty = async () => {
+    if (selectedProperty) {
+      try {
+        const res = await manager_property.delete_property({
+          withCredentials: true,
+          params: { property_id: selectedProperty.id },
+        });
+
+        if (!res)
+          return success({
+            type: "error",
+            text: `ເກີດຂໍ້ຜິດພາດໃນການລົບ`,
+          });
+
+        const res_delete_folder_on_fastapi = await deleteFolder(
+          String(id),
+          selectedProperty.uuid
+        );
+        setOpenPopConfirm(false);
+        success({
+          type: "success",
+          text: `ລົບເຮືອນເຊົ່າໄອດີ: ${selectedProperty.name} ສຳເລັດແລ້ວ!`,
+        });
+        setSelectedProperty(null);
+        refreshDataProperties();
+      } catch (err: any) {
+        console.error(err);
+
+        if (err.response) {
+          console.log(
+            `❌ Error: ${err.response.data.message || "ບໍ່ສາມາດລົບໄດ້"}`
+          );
+        } else {
+          console.log("ເກີດຂໍ້ຜິດພາດໃນ Server");
+        }
+      } finally {
+        // setLoading(false);
+      }
     }
   };
 
@@ -219,14 +375,18 @@ const MyProperties = () => {
     property,
     statusForm,
   }: {
-    property: PropertyModelTest;
-    statusForm: string;
+    property: PropertyTypeResponse;
+    statusForm: "create" | "update";
   }) => {
     setStatusForm(statusForm);
     setSelectedProperty(property);
     setIsFormModalOpen(true);
   };
-  const handleOpenFormModel = ({ statusForm }: { statusForm: string }) => {
+  const handleOpenFormModel = ({
+    statusForm,
+  }: {
+    statusForm: "create" | "update";
+  }) => {
     setStatusForm(statusForm);
     setSelectedProperty(null);
     setIsFormModalOpen(true);
@@ -234,16 +394,17 @@ const MyProperties = () => {
   const handleCloseFormModel = () => {
     setSelectedProperty(null);
     setIsFormModalOpen(false);
+    setStatusForm("");
   };
 
-  const handleDeleteClick = (property: PropertyModelTest) => {
+  const handleDeleteClick = (property: PropertyTypeResponse) => {
     setSelectedProperty(property);
     setOpenPopConfirm(true);
   };
 
   return (
     <div>
-      <div className="bg-gray-50">
+      <div className="bg-gray-50 p-6">
         <div className="">
           {/* ส่วนหัวของหน้า */}
           <div className="flex justify-between items-center mb-6">
@@ -275,9 +436,11 @@ const MyProperties = () => {
 
         {/* Modal สำหรับเพิ่มทรัพย์สินใหม่ */}
         <Form
+          isLoading={isLoading}
           isOpen={isFormModalOpen}
           onClose={handleCloseFormModel}
           onAddProperty={handleAddProperty}
+          onEditProperty={onEditProperty}
           selectedProperty={selectedProperty}
           statusForm={statusForm}
         />

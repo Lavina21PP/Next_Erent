@@ -1,10 +1,10 @@
-import Login from '@/components/frontend/auth/login'
+import LoginComponent from '@/components/frontend/login'
 import React from 'react'
 
 function Page() {
   return (
     <div>
-        <Login />
+        <LoginComponent />
     </div>
   )
 }

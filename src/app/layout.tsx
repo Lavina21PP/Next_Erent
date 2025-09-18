@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { MessageProvider } from "@/components/frontend/context/MessageContext";
+import { NotificationProvider } from "@/components/frontend/context/NotificationContext";
 import ClientLayout from "@/components/frontend/appbar/ClientLayout";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -16,9 +18,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased`}>
-        <MessageProvider>
-          <ClientLayout>{children}</ClientLayout>
-        </MessageProvider>
+        {/* NotificationProvider ใส่ด้านบนสุด */}
+        <NotificationProvider>
+          <MessageProvider>
+            <ClientLayout>
+              {children}
+              <Toaster richColors position="top-right" duration={5000} />
+            </ClientLayout>
+          </MessageProvider>
+        </NotificationProvider>
       </body>
     </html>
   );

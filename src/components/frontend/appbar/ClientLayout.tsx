@@ -11,6 +11,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   const pathname = usePathname();
 
   const noNavbarRoutes = [
+    "/verification",
     "/login",
     "/signup",
     "/register",
@@ -20,9 +21,9 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   const useAppBarLayout = !noNavbarRoutes.includes(pathname);
 
   return useAppBarLayout ? (
-    <AppBarLayout>
-      <RoleProvider>{children}</RoleProvider>
-    </AppBarLayout>
+    <RoleProvider>
+      <AppBarLayout>{children}</AppBarLayout>
+    </RoleProvider>
   ) : (
     <>{children}</>
   );

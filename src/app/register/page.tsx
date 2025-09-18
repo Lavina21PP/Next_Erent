@@ -1,10 +1,10 @@
-import Register from '@/components/frontend/auth/register'
+import RegisterComponent from '@/components/frontend/register'
 import React from 'react'
 
 function Page() {
   return (
     <div>
-        <Register />
+        <RegisterComponent />
     </div>
   )
 }

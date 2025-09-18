@@ -26,15 +26,15 @@ async function checkAuth(token: string | undefined, req: NextRequest) {
     const role = payload.role as string | undefined;
     const pathname = req.nextUrl.pathname;
 
-    if (pathname.startsWith("/admin") && role !== "ADMIN") {
+    if (pathname.startsWith("/admin") && role !== "Admin") {
       return NextResponse.redirect(new URL("/403", req.url));
     }
 
-    if (pathname.startsWith("/landlord") && role !== "LANDLORD") {
+    if (pathname.startsWith("/landlord") && role !== "Landlord") {
       return NextResponse.redirect(new URL("/403", req.url));
     }
 
-    if (pathname.startsWith("/tenant") && role !== "TENANT") {
+    if (pathname.startsWith("/tenant") && role !== "Tenant") {
       return NextResponse.redirect(new URL("/403", req.url));
     }
 
