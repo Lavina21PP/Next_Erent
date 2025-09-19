@@ -112,7 +112,7 @@ export async function create_token_reset_password(user: {
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     path: "/",
-    maxAge: 60 * 60 * 3,
+    maxAge: 60 * 3,
   });
 
   return res;

@@ -74,7 +74,6 @@ io.on("connection", async (socket) => {
         },
       });
 
-      // broadcast message ไปทุกคนใน room
       io.to(msg.conversation_id.toString()).emit("message", saved);
 
       // --- ส่ง notification แยก user (ถ้าอยากทำ badge) ---

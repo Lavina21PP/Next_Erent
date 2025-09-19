@@ -23,7 +23,7 @@ export default function RootLayout({
           <MessageProvider>
             <ClientLayout>
               {children}
-              <Toaster richColors position="top-right" duration={5000} />
+              <Toaster richColors position="top-right" duration={2000} />
             </ClientLayout>
           </MessageProvider>
         </NotificationProvider>

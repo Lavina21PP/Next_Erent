@@ -2,23 +2,16 @@ interface PropertyImage {
   id: number;
   image: string;
 }
-interface SelectedImage {
-  id: string; // unique id
-  fileOrName: File | string;
-  preview: string;
-  isExisting?: boolean;
-}
-
 export interface PropertyTypeResponse {
   id: number;
   user: {
     id: number;
-  }
+  };
   uuid: string;
   landlord_id: number;
   name: string;
   description: string;
-  address: string;
+  village: string;
   price: string;
   property_status_id: number;
   property_type_id: number;
@@ -38,6 +31,20 @@ export interface PropertyTypeResponse {
     id: number;
     name: string;
   };
+  property_provinces: {
+    provinces: Record<
+      string,
+      {
+        key: string;
+        name_la?: string;
+        name_en?: string;
+        districts_la: string[];
+        districts_en: string[];
+      }
+    >;
+  };
+  province: string;
+  district: string;
 }
 
 export type PropertyTypeCreate = Omit<

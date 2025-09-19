@@ -1,5 +1,7 @@
 interface TypeDetailProperty {
-  address: string;
+  village: string;
+  province: string;
+  district: string;
   coverImage: string;
   uuid: string;
   created_at: string;

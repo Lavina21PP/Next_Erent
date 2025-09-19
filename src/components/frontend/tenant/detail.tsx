@@ -325,12 +325,16 @@ const HouseRentalDetail: React.FC<{
 
               <div className="flex items-center text-gray-600 mb-4">
                 <MapPin className="w-5 h-5 mr-2" />
-                <span>{property.address}</span>
+                <span>
+                  {property.village}
+                  {property.district}
+                  {property.province}
+                </span>
               </div>
 
               <div className="flex items-center justify-between mb-6">
                 <div className="text-3xl font-bold text-indigo-600">
-                  ฿{property.price.toLocaleString()}
+                  {property.price.toLocaleString()}
                   <span className="text-lg text-gray-500">/ເດືອນ</span>
                 </div>
                 <div className="flex items-center space-x-1">

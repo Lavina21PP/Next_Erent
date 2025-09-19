@@ -26,7 +26,7 @@ const Message = ({ initialChat }: { initialChat?: any }) => {
   const conversation_id = getFlash("conversation_id");
   const [selectedChat, setSelectedChat] = useState<number | null>(null);
   const [contact, setContact] = useState<any>(initialChat);
-  const [chat, setChat] = useState<any>();
+  const [chat, setChat] = useState<any>([]);
   const { id } = useRole();
 
   // const member = initialChat.conversation_members.find((m: any) => m.user.id === id);
@@ -50,7 +50,6 @@ const Message = ({ initialChat }: { initialChat?: any }) => {
     setSelectedChat(id);
     const chat = updatedContact?.find((c: any) => c.id === id);
     setChat(chat);
-    console.log('chat', chat)
   };
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -65,14 +64,14 @@ const Message = ({ initialChat }: { initialChat?: any }) => {
     setIsAtBottom(atBottom);
   };
 
-useEffect(() => {
-  if (isAtBottom && messagesEndRef.current) {
-    messagesEndRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
-  }
-}, [chat]); 
+  useEffect(() => {
+    if (isAtBottom && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [chat]);
 
   useEffect(() => {
     const div = containerRef.current;
@@ -107,7 +106,20 @@ useEffect(() => {
 
     // รับข้อความใหม่
     socket.on("message", (msg: Message) => {
-      if (msg.conversation_id === selectedChat) {
+      const exists = contact.some(
+        (conv: { id: any }) => conv.id === msg.conversation_id
+      );
+
+      console.log('a', msg)
+      console.log('s', exists)
+
+
+      if (!exists) {
+        console.log(11);
+        refreshMessage();
+      }
+
+      if (msg.conversation_id) {
         setContact((prev: any) =>
           prev.map((conversation: any) => {
             if (conversation.id === msg.conversation_id) {
@@ -122,25 +134,8 @@ useEffect(() => {
 
         setChat((prev: any) => ({
           ...prev,
-          messages: [...prev.messages, msg],
+          messages: [...(prev.messages || []), msg],
         }));
-      }
-    });
-
-    // รับ notification (จาก server สำหรับ badge)
-    socket.on("new-message-notification", (msg: Message) => {
-      if (msg.conversation_id !== selectedChat) {
-        setContact((prev: any) =>
-          prev.map((conversation: any) => {
-            if (conversation.id === msg.conversation_id) {
-              return {
-                ...conversation,
-                messages: [...conversation.messages, msg],
-              };
-            }
-            return conversation;
-          })
-        );
       }
     });
 

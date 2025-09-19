@@ -79,7 +79,9 @@ model property {
   landlord_id        Int
   name               String               @db.VarChar(255)
   description        String?              @db.Text
-  address            String?              @db.Text
+  village            String?              @db.VarChar(100)
+  district           String?              @db.VarChar(100)
+  province           String?              @db.VarChar(100)
   price              Decimal?             @db.Decimal(10, 2)
   property_status_id Int?
   property_type_id   Int

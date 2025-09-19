@@ -24,7 +24,7 @@ const RentalPropertiesList: React.FC<{
       const matchesSearch =
         property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         property.price.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        property.address.toLowerCase().includes(searchTerm.toLowerCase());
+        property.village.toLowerCase().includes(searchTerm.toLowerCase());
 
       return matchesSearch;
     });
@@ -118,7 +118,7 @@ const RentalPropertiesList: React.FC<{
 
           <div className="flex items-center text-gray-600 mb-3">
             <MapPin size={16} className="mr-1" />
-            <span className="text-sm sm:text-base">{property.address}</span>
+            <span className="text-sm sm:text-base">{property.village}</span>
           </div>
 
           <p className="text-gray-600 text-sm sm:text-base mb-3 line-clamp-2">
@@ -128,7 +128,7 @@ const RentalPropertiesList: React.FC<{
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mt-4">
             <div>
               <span className="text-2xl sm:text-3xl font-bold text-blue-600">
-                ฿{formatPrice(Number(property.price))}
+                {formatPrice(Number(property.price))}
               </span>
               <span className="text-gray-500 text-sm sm:text-base ml-1">
                 /ເດືອນ

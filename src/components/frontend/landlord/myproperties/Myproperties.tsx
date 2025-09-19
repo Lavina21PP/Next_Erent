@@ -25,6 +25,9 @@ const PropertyCard: React.FC<{
   const router = useRouter();
   const { id } = useRole();
 
+
+  
+
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-200 relative">
       {/* ส่วนรูปภาพ */}
@@ -84,7 +87,7 @@ const PropertyCard: React.FC<{
 
         <div className="flex items-center text-gray-600 mb-3">
           <MapPin size={16} className="mr-1" />
-          <span className="text-sm sm:text-base">{property.address}</span>
+          <span className="text-sm sm:text-base">{property.village}</span>
         </div>
         <p className="text-gray-600 text-sm sm:text-base mb-3 line-clamp-2">
           {property.description}
@@ -92,7 +95,7 @@ const PropertyCard: React.FC<{
 
         <div>
           <span className="text-2xl sm:text-3xl font-bold text-blue-600">
-            ฿{property.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            {property.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
           </span>
           <span className="text-gray-500 text-sm sm:text-base ml-1">
             /month
@@ -180,7 +183,9 @@ const MyProperties: React.FC<{ initialProperties: PropertyTypeResponse[] }> = ({
       formData.append("uuid", uuid);
       formData.append("name", newProperty.name);
       formData.append("description", newProperty.description);
-      formData.append("address", newProperty.address);
+      formData.append("village", newProperty.village);
+      formData.append("district", newProperty.district);
+      formData.append("province", newProperty.province);
       formData.append("price", newProperty.price);
       formData.append("status", String(newProperty.property_status_id));
       formData.append("property_type_id", String(newProperty.property_type_id));
@@ -249,7 +254,9 @@ const MyProperties: React.FC<{ initialProperties: PropertyTypeResponse[] }> = ({
         let formDataPyUpload = new FormData();
         formData.append("name", newProperty.name);
         formData.append("description", newProperty.description);
-        formData.append("address", newProperty.address);
+        formData.append("village", newProperty.village);
+        formData.append("district", newProperty.district);
+        formData.append("province", newProperty.province);
         formData.append("price", newProperty.price);
         formData.append("status", String(newProperty.property_status_id));
         formData.append(

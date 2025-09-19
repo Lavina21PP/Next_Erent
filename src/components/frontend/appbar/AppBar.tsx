@@ -19,6 +19,10 @@ import Spinner from "../ui/spinner";
 import { useNotification } from "../context/NotificationContext";
 import { toast } from "sonner";
 
+const setFlash = (key: string, value: string) => {
+  sessionStorage.setItem(key, value);
+};
+
 // กำหนด Type สำหรับ Navigation Item เพื่อแก้ปัญหา 'any[]'
 interface NavigationItem {
   name: string;
@@ -41,20 +45,34 @@ const AppBarLayout: React.FC<AppBarLayoutProps> = ({ children }) => {
   const [profileDropdown, setProfileDropdown] = useState(false);
 
   const { notifications } = useNotification();
-
+  const lastNotifications = notifications[notifications.length - 1];
   useEffect(() => {
     if (notifications.length > 0) {
-      console.log(notifications)
+      console.log(notifications);
       const id = toast.success(
-        `📩 ${
-          notifications[notifications.length - 1]?.detail_sender.email_phone
-        }`,
+        `${lastNotifications?.detail_sender.email_phone}`,
         {
-          description: `${notifications[notifications.length - 1]?.content}`,
-          // action: {
-          //   label: "❌",
-          //   onClick: () => toast.dismiss(id), // ปิด popup
-          // },
+          description: `${lastNotifications?.content}`,
+          // ปุ่ม ❌
+          action: {
+            label: "View",
+            onClick: () => {
+              setFlash(
+                "conversation_id",
+                lastNotifications?.conversation_id.toString()
+              );
+              router.push(
+                `/${
+                  role === "Landlord"
+                    ? "landlord"
+                    : role === "Tenant" && "tenant"
+                }/message`
+              );
+            },
+          },
+          // เพิ่มคลิกที่ Toast เอง
+          icon: "📩",
+          closeButton: true,
         }
       );
       // showMessage("success", notifications[notifications.length - 1]?.content);

@@ -124,7 +124,9 @@ export async function POST(req: NextRequest) {
     const uuid = formData.get("uuid")?.toString() || "";
     const name = formData.get("name")?.toString() || "";
     const description = formData.get("description")?.toString() || "";
-    const address = formData.get("address")?.toString() || "";
+    const village = formData.get("village")?.toString() || "";
+    const district = formData.get("district")?.toString() || "";
+    const province = formData.get("province")?.toString() || "";
     const price = Number(formData.get("price")?.toString() || 0);
     const status = formData.get("status");
     const property_type_id = Number(
@@ -145,7 +147,9 @@ export async function POST(req: NextRequest) {
       !uuid ||
       !name ||
       !description ||
-      !address ||
+      !village ||
+      !district ||
+      !province ||
       !price ||
       !status ||
       !property_type_id ||
@@ -172,7 +176,9 @@ export async function POST(req: NextRequest) {
         landlord_id: Number(userToken.id),
         name,
         description,
-        address,
+        village: village,
+        district: district,
+        province: province,
         price,
         property_status_id: Number(status),
         property_type_id,
@@ -204,8 +210,6 @@ export async function POST(req: NextRequest) {
     for (const img of name_image_property) {
       imageFileNames.push(img);
     }
-
-    console.log("sdfskdfjlsfjsd", name_image_property);
 
     if (imageFileNames.length > 0) {
       await prisma.property_image.createMany({
@@ -253,7 +257,9 @@ export async function PUT(req: NextRequest) {
 
     const name = formData.get("name")?.toString() || "";
     const description = formData.get("description")?.toString() || "";
-    const address = formData.get("address")?.toString() || "";
+    const village = formData.get("village")?.toString() || "";
+    const district = formData.get("district")?.toString() || "";
+    const province = formData.get("province")?.toString() || "";
     const price = Number(formData.get("price")?.toString() || 0);
     const status = formData.get("status");
     const property_type_id = Number(
@@ -272,7 +278,9 @@ export async function PUT(req: NextRequest) {
     if (
       !name ||
       !description ||
-      !address ||
+      !village ||
+      !district ||
+      !province ||
       !price ||
       !status ||
       !property_type_id ||
@@ -332,7 +340,9 @@ export async function PUT(req: NextRequest) {
         landlord_id: Number(userToken.id),
         name,
         description,
-        address,
+        village: village,
+        district: district,
+        province: province,
         price,
         property_status_id: Number(status),
         property_type_id,

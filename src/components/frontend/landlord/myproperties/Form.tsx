@@ -3,6 +3,8 @@ import { X, Upload, Trash2 } from "lucide-react";
 import { GetEnumDB } from "@/services/api";
 import { PropertyTypeCreate } from "./Type";
 import { useRole } from "../../context/RoleContext";
+import { provinces } from "./address";
+import MapModal from "../../MapWithLocation";
 
 interface PropertyType {
   id: number;
@@ -37,13 +39,13 @@ const Form: React.FC<FormProps> = ({
 }) => {
   const defaultData: PropertyTypeCreate = {
     id: 0,
-    uuid: '',
+    uuid: "",
     user: {
-      id: 0
+      id: 0,
     },
     name: "",
     description: "",
-    address: "",
+    village: "",
     price: "",
     images: [],
     favorite: [],
@@ -54,6 +56,9 @@ const Form: React.FC<FormProps> = ({
     property_type: { id: 0, name: "" },
     latitude: "",
     longitude: "",
+    property_provinces: { provinces: provinces },
+    province: "",
+    district: "",
   };
 
   const { id } = useRole();
@@ -70,6 +75,10 @@ const Form: React.FC<FormProps> = ({
   const [imageUploadError, setImageUploadError] = useState<string>("");
   const [isCoverImageExisting, setIsCoverImageExisting] = useState(false); // เพิ่ม state นี้
 
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
+  const [showModalMap, setShowModalMap] = useState(false);
+
   useEffect(() => {
     if (statusForm === "create") {
       setFormData(defaultData);
@@ -78,11 +87,14 @@ const Form: React.FC<FormProps> = ({
       setCoverImagePreview(null);
       setSelectedImages([]);
       setIsCoverImageExisting(false);
-
-      
     } else if (statusForm === "update" && selectedProperty) {
-      setFormData(selectedProperty);
-      console.log('ddd', selectedProperty)
+      setFormData({
+        ...selectedProperty,
+        province: selectedProperty.province,
+        district: selectedProperty.district,
+        property_provinces: { provinces: provinces },
+      });
+      console.log("ddd", selectedProperty);
       // จัดการ Cover Image
       if (selectedProperty.coverImage) {
         setCoverImage(selectedProperty.coverImage);
@@ -98,7 +110,7 @@ const Form: React.FC<FormProps> = ({
 
       // จัดการรูปภาพเพิ่มเติม
       if (selectedProperty.property_image?.length > 0) {
-        console.log('zz', selectedProperty.property_image)
+        console.log("zz", selectedProperty.property_image);
         const images: SelectedImage[] = selectedProperty.property_image
           .filter((img) => img.image)
           .map((img) => ({
@@ -165,7 +177,30 @@ const Form: React.FC<FormProps> = ({
     >
   ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (name === "property_provinces.province") {
+      // อัพเดต nested province
+      setFormData((prev) => ({
+        ...prev,
+        property_provinces: {
+          ...prev.property_provinces,
+          province: value,
+        },
+      }));
+    } else if (name === "property_provinces.district") {
+      setFormData((prev) => ({
+        ...prev,
+        property_provinces: {
+          ...prev.property_provinces,
+          district: value,
+        },
+      }));
+    } else {
+      // อัพเดต field อื่น ๆ ปกติ
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -287,7 +322,7 @@ const Form: React.FC<FormProps> = ({
                 <h3 className="text-lg font-medium text-gray-700 mb-4">
                   ຂໍ້ມູນພື້ນຖານ
                 </h3>
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid sm:grid-cols-1">
                   <div>
                     <label
                       className="block text-gray-600 text-sm font-medium mb-2"
@@ -306,7 +341,7 @@ const Form: React.FC<FormProps> = ({
                       required
                     />
                   </div>
-                  <div>
+                  {/* <div>
                     <label
                       className="block text-gray-600 text-sm font-medium mb-2"
                       htmlFor="address"
@@ -323,7 +358,7 @@ const Form: React.FC<FormProps> = ({
                       placeholder="ເຊັ່ນ: ບ້ານໂພນໄຊ, ນະຄອນຫຼວງວຽງຈັນ"
                       required
                     />
-                  </div>
+                  </div> */}
                   <div className="sm:col-span-2">
                     <label
                       className="block text-gray-600 text-sm font-medium mb-2"
@@ -346,6 +381,94 @@ const Form: React.FC<FormProps> = ({
               </div>
 
               {/* Property Details */}
+              <div className="border border-gray-100 rounded-lg p-5">
+                <h3 className="text-lg font-medium text-gray-700 mb-4">
+                  ທີ່ຢູ່
+                </h3>
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div>
+                    <label
+                      className="block text-gray-600 text-sm font-medium mb-2"
+                      htmlFor="province"
+                    >
+                      ແຂວງ *
+                    </label>
+                    <select
+                      name="province"
+                      id="province"
+                      value={formData.province} // ตัวนี้เก็บค่าที่เลือก
+                      onChange={handleChange}
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all bg-white text-sm"
+                      required
+                    >
+                      <option value="" disabled>
+                        -- ເລືອກແຂວງ --
+                      </option>
+                      {Object.keys(formData.property_provinces.provinces).map(
+                        (provKey) => (
+                          <option key={provKey} value={provKey}>
+                            {/* {provKey} */}
+                            {provinces[provKey].name_la}
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </div>
+                  <div>
+                    <label
+                      className="block text-gray-600 text-sm font-medium mb-2"
+                      htmlFor="district"
+                    >
+                      ເມືອງ *
+                    </label>
+                    <select
+                      name="district"
+                      id="district"
+                      value={formData.district}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all bg-white text-sm"
+                      required
+                    >
+                      <option value="" disabled>
+                        -- ເລືອກເມືອງ --
+                      </option>
+                      {formData.province ? (
+                        provinces[formData.province].districts_la.map(
+                          (districtName, i) => (
+                            <option key={i} value={districtName}>
+                              {districtName}
+                            </option>
+                          )
+                        )
+                      ) : (
+                        <option value="" disabled>
+                          -- ກະລຸນາເລືອກແຂວງ --
+                        </option>
+                      )}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-gray-600 text-sm font-medium mb-2"
+                      htmlFor="village"
+                    >
+                      ບ້ານ *
+                    </label>
+                    <input
+                      type="text"
+                      name="village"
+                      id="village"
+                      value={formData.village || ""}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all bg-white text-sm"
+                      placeholder="ເຊັ່ນ: ໂພນໄຊ"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="border border-gray-100 rounded-lg p-5">
                 <h3 className="text-lg font-medium text-gray-700 mb-4">
                   ລາຍລະອຽດເຮືອນ
@@ -422,7 +545,7 @@ const Form: React.FC<FormProps> = ({
                 <h3 className="text-lg font-medium text-gray-700 mb-4">
                   ຕຳແໜ່ງພິກັດ
                 </h3>
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid sm:grid-cols-3 gap-4 items-end">
                   <div>
                     <label
                       className="block text-gray-600 text-sm font-medium mb-2"
@@ -458,6 +581,15 @@ const Form: React.FC<FormProps> = ({
                       placeholder="102.6000"
                       required
                     />
+                  </div>
+                  <div>
+                    <button
+                      onClick={() => setShowModalMap(true)}
+                      type="button"
+                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-full"
+                    >
+                      ເລືອກຕຳແໜ່ງ
+                    </button>
                   </div>
                 </div>
               </div>
@@ -606,6 +738,18 @@ const Form: React.FC<FormProps> = ({
           </div>
         </form>
       </div>
+
+      <MapModal
+        showModalMap={showModalMap}
+        setShowModalMap={setShowModalMap}
+        onConfirm={(latitude, longitude) => {
+          setFormData((prev) => ({
+            ...prev,
+            latitude: latitude.toString(),
+            longitude: longitude.toString(),
+          }));
+        }}
+      />
     </div>
   );
 };
